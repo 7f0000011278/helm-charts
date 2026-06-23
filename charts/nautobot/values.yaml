@@ -434,10 +434,8 @@ nautobot:
 
   # Nautobot Redis configuration
   redis:
-    # -- Name of existing secret to use for Redis passwords<sup>[1](#notes)</sup>
-    existingSecret: ""
-    # -- Password key to be retrieved from existing secret<sup>[1](#notes)</sup>
-    existingSecretPasswordKey: ""
+    existingSecret: "redis-secret"
+    existingSecretPasswordKey: "redis-password"
     # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/required-settings/#rq_queues)] Nautobot external Redis hostname, ignored if `redis.enabled` is `true` (NAUTOBOT_REDIS_HOST)<sup>[1](#notes)</sup>
     host: ""
     # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/required-settings/#rq_queues)] Nautobot external Redis password, ignored if `redis.enabled` is `true` (NAUTOBOT_REDIS_PASSWORD)<sup>[1](#notes)</sup>

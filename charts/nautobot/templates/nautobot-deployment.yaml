@@ -1,132 +1,133 @@
-{ { - $config_checksum := dict "checksum/config-env" (include "nautobot.configMap.env" . | sha256sum ) "checksum/config" (include "nautobot.configMap.config" . | sha256sum) } }
-  { { - $nautobots := (include "nautobot.nautobots" .) | mustFromJson - } }
-  { { - range $nautobotName, $nautobot := $nautobots - } }
-  { { - if $nautobot.enabled - } }
+{{- $config_checksum := dict "checksum/config-env" (include "nautobot.configMap.env" . | sha256sum ) "checksum/config" (include "nautobot.configMap.config" . | sha256sum) }}
+{{- $nautobots := (include "nautobot.nautobots" .) | mustFromJson -}}
+{{- range $nautobotName, $nautobot := $nautobots -}}
+{{- if $nautobot.enabled -}}
 ---
-apiVersion: { { include "common.capabilities.deployment.apiVersion" $ } }
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" $ }}
 kind: Deployment
 metadata:
-  name: { { include "common.names.fullname" $ } }-{{ $nautobotName }}
-  namespace: { { $.Release.Namespace | quote } }
-  labels: { { - include "common.labels.standard" $ | nindent 4 } }
+  name: {{ include "common.names.fullname" $ }}-{{ $nautobotName }}
+  namespace: {{ $.Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" $ | nindent 4 }}
     app.kubernetes.io/component: nautobot-{{ $nautobotName }}
-    { { - if $.Values.commonLabels } }
-    { { - include "common.tplvalues.render" ( dict "value" $.Values.commonLabels "context" $ ) | nindent 4 } }
-    { { - end } }
-  { { - if (or $nautobot.annotations $.Values.commonAnnotations) } }
-  annotations: { { - include "common.tplvalues.render" ( dict "value" (merge $nautobot.annotations $.Values.commonAnnotations) "context" $ ) | nindent 4 } }
-  { { - end } }
+    {{- if $.Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if (or $nautobot.annotations $.Values.commonAnnotations) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" (merge $nautobot.annotations $.Values.commonAnnotations) "context" $ ) | nindent 4 }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" (merge $nautobot.annotations $.Values.commonAnnotations) "context" $ ) | nindent 4 }}
+  {{- end }}
 spec:
-  { { - if not $nautobot.autoscaling.enabled } }
-  replicas: { { $nautobot.replicaCount | int } }
-  { { - end } }
-  revisionHistoryLimit: { { $nautobot.revisionHistoryLimit | int } }
-  { { - if $nautobot.updateStrategy } }
-  strategy: { { - toYaml $nautobot.updateStrategy | nindent 4 } }
-  { { - end } }
+  {{- if not $nautobot.autoscaling.enabled }}
+  replicas: {{ $nautobot.replicaCount | int }}
+  {{- end }}
+  revisionHistoryLimit: {{ $nautobot.revisionHistoryLimit | int }}
+  {{- if $nautobot.updateStrategy }}
+  strategy: {{- toYaml $nautobot.updateStrategy | nindent 4 }}
+  {{- end }}
   selector:
-    matchLabels: { { - include "common.labels.matchLabels" $ | nindent 6 } }
+    matchLabels: {{- include "common.labels.matchLabels" $ | nindent 6 }}
       app.kubernetes.io/component: nautobot-{{ $nautobotName }}
   template:
     metadata:
-      { { - if $nautobot.podAnnotations } }
-      annotations: { { - include "common.tplvalues.render" (dict "value" (merge $nautobot.podAnnotations $config_checksum) "context" $) | nindent 8 } }
-      { { - else } }
-      annotations: { { - include "common.tplvalues.render" ( dict "value" $config_checksum "context" $ ) | nindent 8 } }
-      { { - end } }
-      labels: { { - include "common.labels.standard" $ | nindent 8 } }
+      {{- if $nautobot.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" (merge $nautobot.podAnnotations $config_checksum) "context" $) | nindent 8 }}
+      {{- else }}
+      annotations: {{- include "common.tplvalues.render" ( dict "value" $config_checksum "context" $ ) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" $ | nindent 8 }}
         app.kubernetes.io/component: nautobot-{{ $nautobotName }}
-        { { - if $nautobot.podLabels } }
-        { { - include "common.tplvalues.render" (dict "value" $nautobot.podLabels "context" $) | nindent 8 } }
-        { { - end } }
+        {{- if $nautobot.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" $nautobot.podLabels "context" $) | nindent 8 }}
+        {{- end }}
     spec:
-      serviceAccountName: { { include "nautobot.serviceAccountName" $ } }
-      { { - include "nautobot.imagePullSecrets" $ | nindent 6 } }
-      { { - if $nautobot.hostAliases } }
-      hostAliases: { { - include "common.tplvalues.render" (dict "value" $nautobot.hostAliases "context" $) | nindent 8 } }
-      { { - end } }
-      { { - if $nautobot.affinity } }
-      affinity: { { - include "common.tplvalues.render" ( dict "value" $nautobot.affinity "context" $) | nindent 8 } }
-      { { - else } }
+      serviceAccountName: {{ include "nautobot.serviceAccountName" $ }}
+      {{- include "nautobot.imagePullSecrets" $ | nindent 6 }}
+      {{- if $nautobot.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" $nautobot.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $nautobot.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" $nautobot.affinity "context" $) | nindent 8 }}
+      {{- else }}
       affinity:
-        podAffinity: { { - include "common.affinities.pods" (dict "type" $nautobot.podAffinityPreset "component" (printf "%s-%s" "nautobot" $nautobotName) "context" $) | nindent 10 } }
-        podAntiAffinity: { { - include "common.affinities.pods" (dict "type" $nautobot.podAntiAffinityPreset "component" (printf "%s-%s" "nautobot" $nautobotName) "context" $) | nindent 10 } }
-        nodeAffinity: { { - include "common.affinities.nodes" (dict "type" $nautobot.nodeAffinityPreset.type "key" $nautobot.nodeAffinityPreset.key "values" $nautobot.nodeAffinityPreset.values) | nindent 10 } }
-      { { - end } }
-      { { - if $nautobot.nodeSelector } }
-      nodeSelector: { { - include "common.tplvalues.render" ( dict "value" $nautobot.nodeSelector "context" $) | nindent 8 } }
-      { { - end } }
-      { { - if $nautobot.tolerations } }
-      tolerations: { { - include "common.tplvalues.render" (dict "value" $nautobot.tolerations "context" $) | nindent 8 } }
-      { { - end } }
-      { { - if $nautobot.priorityClassName } }
-      priorityClassName: { { $nautobot.priorityClassName | quote } }
-      { { - end } }
-      { { - if $nautobot.podSecurityContext.enabled } }
-      securityContext: { { - omit $nautobot.podSecurityContext "enabled" | toYaml | nindent 8 } }
-      { { - end } }
+        podAffinity: {{- include "common.affinities.pods" (dict "type" $nautobot.podAffinityPreset "component" (printf "%s-%s" "nautobot" $nautobotName) "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" $nautobot.podAntiAffinityPreset "component" (printf "%s-%s" "nautobot" $nautobotName) "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" $nautobot.nodeAffinityPreset.type "key" $nautobot.nodeAffinityPreset.key "values" $nautobot.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if $nautobot.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" $nautobot.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $nautobot.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" $nautobot.tolerations "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $nautobot.priorityClassName }}
+      priorityClassName: {{ $nautobot.priorityClassName | quote }}
+      {{- end }}
+      {{- if $nautobot.podSecurityContext.enabled }}
+      securityContext: {{- omit $nautobot.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       initContainers:
-        { { - if (and (not $.Values.nautobot.singleInit) (or $nautobot.initNautobot $nautobot.staticFilesOnly)) } }
+        {{- if (and (not $.Values.nautobot.singleInit) (or $nautobot.initNautobot $nautobot.staticFilesOnly)) }}
         # This init container will run post_upgrade which initializes/upgrades the DB as well as collects static files
         - name: nautobot-init
-          image: { { include "nautobot.image" $ } }
-          imagePullPolicy: { { $nautobot.image.pullPolicy } }
-          { { - if $nautobot.containerSecurityContext.enabled } }
-          securityContext: { { - omit $nautobot.containerSecurityContext "enabled" | toYaml | nindent 12 } }
-          { { - end } }
+          image: {{ include "nautobot.image" $ }}
+          imagePullPolicy: {{ $nautobot.image.pullPolicy }}
+          {{- if $nautobot.containerSecurityContext.enabled }}
+          securityContext: {{- omit $nautobot.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           args:
             - "echo"
             - "Nautobot Initialization Done"
           env:
-            { { - if $nautobot.extraEnvVars } }
-              { { - include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 } }
-              { { - end } }
-              - name: NAUTOBOT_DB_USER
-                { { - include "nautobot.database.userEnvVarDef" $ | nindent 14 } }
-              - name: NAUTOBOT_DB_PASSWORD
-                { { - include "nautobot.database.passEnvVarDef" $ | nindent 14 } }
-              - name: NAUTOBOT_REDIS_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: { { include "nautobot.redis.passwordName" $ } }
-                    key: { { include "nautobot.redis.passwordKey" $ } }
-              - name: NAUTOBOT_SECRET_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: { { include "nautobot.django.secretName" $ } }
-                    key: { { include "nautobot.django.existingSecretSecretKeyKey" $ } }
-              { { if $nautobot.superUser.existingSecret - } }
-              - name: NAUTOBOT_SUPERUSER_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: { { include "nautobot.superUser.secretName" $ } }
-                    key: { { include "nautobot.superUser.existingSecretPasswordKey" $ } }
-              - name: NAUTOBOT_SUPERUSER_API_TOKEN
-                valueFrom:
-                  secretKeyRef:
-                    name: { { include "nautobot.superUser.secretName" $ } }
-                    key: { { include "nautobot.superUser.existingSecretApiTokenKey" $ } }
-              { { - end } }
+            {{- if $nautobot.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+            - name: NAUTOBOT_DB_USER
+              {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_DB_PASSWORD
+              {{- include "nautobot.database.passEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.redis.passwordName" $ }}
+                  key: {{ include "nautobot.redis.passwordKey" $ }}
+            - name: NAUTOBOT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.django.secretName" $ }}
+                  key: {{ include "nautobot.django.existingSecretSecretKeyKey" $ }}
+            {{ if $nautobot.superUser.existingSecret -}}
+            - name: NAUTOBOT_SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.superUser.secretName" $ }}
+                  key: {{ include "nautobot.superUser.existingSecretPasswordKey" $ }}
+            - name: NAUTOBOT_SUPERUSER_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.superUser.secretName" $ }}
+                  key: {{ include "nautobot.superUser.existingSecretApiTokenKey" $ }}
+            {{- end }}
           envFrom:
             - configMapRef:
-                name: { { include "common.names.fullname" $ } }-env
+                name: {{ include "common.names.fullname" $ }}-env
             - secretRef:
-            name: { { include "common.names.fullname" $ } }-env
+                name: {{ include "common.names.fullname" $ }}-env
             {{- if $nautobot.extraEnvVarsCM }}
             {{- range $nautobot.extraEnvVarsCM }}
             - configMapRef:
-            name: { { include "common.tplvalues.render" (dict "value" . "context" $) } }
-            { { - end } }
-            { { - end } }
-            { { - if $nautobot.extraEnvVarsSecret } }
-            { { - range $nautobot.extraEnvVarsSecret } }
+                name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+            {{- end }}
+            {{- end }}
+            {{- if $nautobot.extraEnvVarsSecret }}
+            {{- range $nautobot.extraEnvVarsSecret }}
             - secretRef:
-                name: { { include "common.tplvalues.render" (dict "value" . "context" $) } }
-            { { - end } }
-            { { - end } }
-          { { - if $nautobot.resources } }
-          resources: { { - toYaml $nautobot.resources | nindent 12 } }
-          { { - end } }
+                name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+            {{- end }}
+            {{- end }}
+          {{- if $nautobot.resources }}
+          resources: {{- toYaml $nautobot.resources | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: "nautobot-static"
               mountPath: "/opt/nautobot/static"
@@ -135,31 +136,31 @@ spec:
             - name: "nautobot-config"
               mountPath: "/opt/nautobot/uwsgi.ini"
               subPath: "uwsgi.ini"
-            { { - if or $nautobot.secret_name_tls $nautobot.nginx.enabled } }
+            {{- if or $nautobot.secret_name_tls $nautobot.nginx.enabled }}
             - name: "nautobot-certs"
               mountPath: "/opt/certs"
-            { { - end } }
-            { { - if $.Values.nautobot.config } }
+            {{- end }}
+            {{- if $.Values.nautobot.config }}
             - name: "nautobot-config"
               mountPath: "/opt/nautobot/nautobot_config.py"
               subPath: "nautobot_config.py"
-            { { - else if $.Values.nautobot.configCM } }
+            {{- else if $.Values.nautobot.configCM }}
             - name: "nautobot-config-custom"
               mountPath: "/opt/nautobot/nautobot_config.py"
               subPath: "nautobot_config.py"
-            { { - end } }
-            { { - if $nautobot.extraVolumeMounts } }
-            { { - include "common.tplvalues.render" ( dict "value" $nautobot.extraVolumeMounts "context" $) | nindent 12 } }
-            { { - end } }
-        { { - end } }
-        { { - if and (or $nautobot.nginx.enabled $nautobot.staticFilesOnly) (not $nautobot.secret_name_tls) } }
+            {{- end }}
+            {{- if $nautobot.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" ( dict "value" $nautobot.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
+        {{- end }}
+        {{- if and (or $nautobot.nginx.enabled $nautobot.staticFilesOnly) (not $nautobot.secret_name_tls) }}
         # This container is used to copy the self-signed SSL certs from the Nautobot pod to the nginx pod and changes the permission
         - name: nautobot-certs
-          image: { { include "nautobot.image" $ } }
-          imagePullPolicy: { { $nautobot.image.pullPolicy } }
-          { { - if $nautobot.containerSecurityContext.enabled } }
-          securityContext: { { - omit $nautobot.containerSecurityContext "enabled" | toYaml | nindent 12 } }
-          { { - end } }
+          image: {{ include "nautobot.image" $ }}
+          imagePullPolicy: {{ $nautobot.image.pullPolicy }}
+          {{- if $nautobot.containerSecurityContext.enabled }}
+          securityContext: {{- omit $nautobot.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           command:
             - "/bin/bash"
           args:
@@ -167,220 +168,220 @@ spec:
             # default dir path is `/opt/nautobot` so we copy `/opt/nautobot/nautobot.key` and `/opt/nautobot/nautobot.crt`
             - "cp {{ $nautobot.nginx.certificates_path }}/nautobot.* /opt/certs && chmod g+r /opt/certs/nautobot.* && ls -l /opt/certs/*"
           env:
-            { { - if $nautobot.extraEnvVars } }
-              { { - include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 } }
-              { { - end } }
-              - name: NAUTOBOT_DB_USER
-                { { - include "nautobot.database.userEnvVarDef" $ | nindent 14 } }
-              - name: NAUTOBOT_DB_PASSWORD
-                { { - include "nautobot.database.passEnvVarDef" $ | nindent 14 } }
-              - name: NAUTOBOT_REDIS_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: { { include "nautobot.redis.passwordName" $ } }
-                    key: { { include "nautobot.redis.passwordKey" $ } }
-          envFrom:
-            - configMapRef:
-                name: { { include "common.names.fullname" $ } }-env
-            - secretRef:
-            name: { { include "common.names.fullname" $ } }-env
-            {{- if $nautobot.extraEnvVarsCM }}
-            {{- range $nautobot.extraEnvVarsCM }}
-            - configMapRef:
-            name: { { include "common.tplvalues.render" (dict "value" . "context" $) } }
-            { { - end } }
-            { { - end } }
-            { { - if $nautobot.extraEnvVarsSecret } }
-            { { - range $nautobot.extraEnvVarsSecret } }
-            - secretRef:
-                name: { { include "common.tplvalues.render" (dict "value" . "context" $) } }
-            { { - end } }
-            { { - end } }
-          { { - if $nautobot.resources } }
-          resources: { { - toYaml $nautobot.resources | nindent 12 } }
-          { { - end } }
-          volumeMounts:
-            - name: "nautobot-certs"
-              mountPath: "/opt/certs"
-            { { - if $nautobot.extraVolumeMounts } }
-            { { - include "common.tplvalues.render" ( dict "value" $nautobot.extraVolumeMounts "context" $) | nindent 12 } }
-            { { - end } }
-        { { - end } }
-        { { - if $nautobot.initContainers } }
-        { { - include "common.tplvalues.render" (dict "value" $nautobot.initContainers "context" $) | nindent 8 } }
-        { { - end } }
-      containers:
-        { { - if not $nautobot.staticFilesOnly } }
-        - name: nautobot
-          tty: true
-          image: { { include "nautobot.image" $ } }
-          imagePullPolicy: { { $nautobot.image.pullPolicy } }
-          { { - if $nautobot.lifecycleHooks } }
-          lifecycle: { { - include "common.tplvalues.render" (dict "value" $nautobot.lifecycleHooks "context" $) | nindent 12 } }
-          { { - end } }
-          { { - if $nautobot.containerSecurityContext.enabled } }
-          securityContext: { { - omit $nautobot.containerSecurityContext "enabled" | toYaml | nindent 12 } }
-          { { - end } }
-          { { - if $nautobot.command } }
-          command: { { - include "common.tplvalues.render" (dict "value" $nautobot.command "context" $) | nindent 12 } }
-          { { - end } }
-          { { - if $nautobot.args } }
-          args: { { - include "common.tplvalues.render" (dict "value" $nautobot.args "context" $) | nindent 12 } }
-          { { - end } }
-          env:
-            - name: "NAUTOBOT_K8S_COMPONENT"
-              value: "nautobot-{{ $nautobotName }}"
-            { { - if $nautobot.extraEnvVars } }
-            { { - include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 } }
-            { { - end } }
-            { { - if not .Values.useImageEnv } }
+            {{- if $nautobot.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
             - name: NAUTOBOT_DB_USER
-              { { - include "nautobot.database.userEnvVarDef" $ | nindent 14 } }
+              {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
             - name: NAUTOBOT_DB_PASSWORD
-              { { - include "nautobot.database.passEnvVarDef" $ | nindent 14 } }
-            { { - end } }
+              {{- include "nautobot.database.passEnvVarDef" $ | nindent 14 }}
             - name: NAUTOBOT_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: { { include "nautobot.redis.passwordName" $ } }
-                  key: { { include "nautobot.redis.passwordKey" $ } }
-            - name: NAUTOBOT_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: { { include "nautobot.django.secretName" $ } }
-                  key: { { include "nautobot.django.existingSecretSecretKeyKey" $ } }
-            { { if $nautobot.superUser.existingSecret - } }
-            - name: NAUTOBOT_SUPERUSER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: { { include "nautobot.superUser.secretName" $ } }
-                  key: { { include "nautobot.superUser.existingSecretPasswordKey" $ } }
-            - name: NAUTOBOT_SUPERUSER_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: { { include "nautobot.superUser.secretName" $ } }
-                  key: { { include "nautobot.superUser.existingSecretApiTokenKey" $ } }
-            { { - end } }
+                  name: {{ include "nautobot.redis.passwordName" $ }}
+                  key: {{ include "nautobot.redis.passwordKey" $ }}
           envFrom:
             - configMapRef:
-                name: { { include "common.names.fullname" $ } }-env
+                name: {{ include "common.names.fullname" $ }}-env
             - secretRef:
-            name: { { include "common.names.fullname" $ } }-env
+                name: {{ include "common.names.fullname" $ }}-env
             {{- if $nautobot.extraEnvVarsCM }}
             {{- range $nautobot.extraEnvVarsCM }}
             - configMapRef:
-            name: { { include "common.tplvalues.render" (dict "value" . "context" $) } }
-            { { - end } }
-            { { - end } }
-            { { - if $nautobot.extraEnvVarsSecret } }
-            { { - range $nautobot.extraEnvVarsSecret } }
+                name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+            {{- end }}
+            {{- end }}
+            {{- if $nautobot.extraEnvVarsSecret }}
+            {{- range $nautobot.extraEnvVarsSecret }}
             - secretRef:
-                name: { { include "common.tplvalues.render" (dict "value" . "context" $) } }
-            { { - end } }
-            { { - end } }
-          { { - if $nautobot.resources } }
-          resources: { { - toYaml $nautobot.resources | nindent 12 } }
-          { { - end } }
-          { { - if and $nautobot.livenessProbe.enabled (or (hasKey $nautobot.livenessProbe "httpGet") (hasKey $nautobot.livenessProbe "tcpSocket")) } }
-          livenessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $nautobot.livenessProbe "enabled" "exec") "context" $) | nindent 12 } }
-          { { - else if $nautobot.livenessProbe.enabled } }
-          livenessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $nautobot.livenessProbe "enabled") "context" $) | nindent 12 } }
-          { { - end } }
-          { { - if and $nautobot.readinessProbe.enabled (or (hasKey $nautobot.readinessProbe "exec") (hasKey $nautobot.readinessProbe "tcpSocket")) } }
-          readinessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $nautobot.readinessProbe "enabled" "httpGet") "context" $) | nindent 12 } }
-          { { - else if $nautobot.readinessProbe.enabled } }
-          readinessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $nautobot.readinessProbe "enabled") "context" $) | nindent 12 } }
-          { { - end } }
-          { { - if and $nautobot.startupProbe "exec"  (or (hasKey $nautobot.startupProbe "exec") (hasKey $nautobot.startupProbe "tcpSocket")) } }
-          startupProbe: { { - include "common.tplvalues.render" (dict "value" (omit $nautobot.startupProbe "enabled" "httpGet") "context" $) | nindent 12 } }
-          { { - else if $nautobot.startupProbe.enabled } }
-          startupProbe: { { - include "common.tplvalues.render" (dict "value" (omit $nautobot.startupProbe "enabled") "context" $) | nindent 12 } }
-          { { - end } }
+                name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+            {{- end }}
+            {{- end }}
+          {{- if $nautobot.resources }}
+          resources: {{- toYaml $nautobot.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: "nautobot-certs"
+              mountPath: "/opt/certs"
+            {{- if $nautobot.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" ( dict "value" $nautobot.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
+        {{- end }}
+        {{- if $nautobot.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" $nautobot.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        {{- if not $nautobot.staticFilesOnly }}
+        - name: nautobot
+          tty: true
+          image: {{ include "nautobot.image" $ }}
+          imagePullPolicy: {{ $nautobot.image.pullPolicy }}
+          {{- if $nautobot.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" $nautobot.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $nautobot.containerSecurityContext.enabled }}
+          securityContext: {{- omit $nautobot.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if $nautobot.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" $nautobot.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $nautobot.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" $nautobot.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: "NAUTOBOT_K8S_COMPONENT"
+              value: "nautobot-{{ $nautobotName }}"
+                      {{- if $nautobot.extraEnvVars }}
+                      {{- include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 }}
+                      {{- end }}
+            {{- if not .Values.useImageEnv }}
+            - name: NAUTOBOT_DB_USER
+                        {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_DB_PASSWORD
+                        {{- include "nautobot.database.passEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.redis.passwordName" $ }}
+                  key: {{ include "nautobot.redis.passwordKey" $ }}
+                      {{- end }}
+            - name: NAUTOBOT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.django.secretName" $ }}
+                  key: {{ include "nautobot.django.existingSecretSecretKeyKey" $ }}
+                      {{ if $nautobot.superUser.existingSecret -}}
+            - name: NAUTOBOT_SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.superUser.secretName" $ }}
+                  key: {{ include "nautobot.superUser.existingSecretPasswordKey" $ }}
+            - name: NAUTOBOT_SUPERUSER_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.superUser.secretName" $ }}
+                  key: {{ include "nautobot.superUser.existingSecretApiTokenKey" $ }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "common.names.fullname" $ }}-env
+            - secretRef:
+                name: {{ include "common.names.fullname" $ }}-env
+            {{- if $nautobot.extraEnvVarsCM }}
+            {{- range $nautobot.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+            {{- end }}
+            {{- end }}
+            {{- if $nautobot.extraEnvVarsSecret }}
+            {{- range $nautobot.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+            {{- end }}
+            {{- end }}
+          {{- if $nautobot.resources }}
+          resources: {{- toYaml $nautobot.resources | nindent 12 }}
+          {{- end }}
+          {{- if and $nautobot.livenessProbe.enabled (or (hasKey $nautobot.livenessProbe "httpGet") (hasKey $nautobot.livenessProbe "tcpSocket")) }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $nautobot.livenessProbe "enabled" "exec") "context" $) | nindent 12 }}
+          {{- else if $nautobot.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $nautobot.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if and $nautobot.readinessProbe.enabled (or (hasKey $nautobot.readinessProbe "exec") (hasKey $nautobot.readinessProbe "tcpSocket")) }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $nautobot.readinessProbe "enabled" "httpGet") "context" $) | nindent 12 }}
+          {{- else if $nautobot.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $nautobot.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if and $nautobot.startupProbe "exec"  (or (hasKey $nautobot.startupProbe "exec") (hasKey $nautobot.startupProbe "tcpSocket")) }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit $nautobot.startupProbe "enabled" "httpGet") "context" $) | nindent 12 }}
+          {{- else if $nautobot.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit $nautobot.startupProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: "nautobot-static"
               mountPath: "/opt/nautobot/static"
-            { { - if $nautobot.persistenceMediaFiles.enabled } }
+            {{- if $nautobot.persistenceMediaFiles.enabled }}
             - name: "nautobot-media"
               mountPath: "/opt/nautobot/media"
-            { { - end } }
+            {{- end }}
             - name: "git-repos"
               mountPath: "/opt/nautobot/git"
             - name: "nautobot-config"
               mountPath: "/opt/nautobot/uwsgi.ini"
               subPath: "uwsgi.ini"
-            { { - if $.Values.nautobot.config } }
+            {{- if $.Values.nautobot.config }}
             - name: "nautobot-config"
               mountPath: "/opt/nautobot/nautobot_config.py"
               subPath: "nautobot_config.py"
-            { { - else if $.Values.nautobot.configCM } }
+            {{- else if $.Values.nautobot.configCM }}
             - name: "nautobot-config-custom"
               mountPath: "/opt/nautobot/nautobot_config.py"
               subPath: "nautobot_config.py"
-            { { - end } }
-            { { - if $nautobot.secret_name_tls } }
+            {{- end }}
+            {{- if $nautobot.secret_name_tls }}
             - name: "nautobot-certs"
               mountPath: "/opt/certs"
-            { { - end } }
-            { { - if eq (include "nautobot.kubernetesJobsEnabled" $) "true" } }
-            { { - range $i, $workerName := (include "nautobot.kubernetesWorkers" $) | fromJsonArray } }
+            {{- end }}
+            {{- if eq (include "nautobot.kubernetesJobsEnabled" $) "true" }}
+            {{- range $i, $workerName := (include "nautobot.kubernetesWorkers" $) | fromJsonArray }}
             - name: "nautobot-k8s-jobs-manifests"
               mountPath: "{{ printf "%s/%s/manifest.json" $.Values.nautobot.jobsManifestsMountPath $workerName }}"
               subPath: "{{ $workerName }}"
               readOnly: true
-            { { - end } }
-            { { - end } }
-            { { - if $nautobot.extraVolumeMounts } }
-            { { - include "common.tplvalues.render" ( dict "value" $nautobot.extraVolumeMounts "context" $) | nindent 12 } }
-            { { - end } }
+            {{- end }}
+            {{- end }}
+            {{- if $nautobot.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" ( dict "value" $nautobot.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
           ports:
-            { { - if not $nautobot.nginx.enabled } }
-              { { - if not $nautobot.uwsgi.disableHttps } }
-              - name: "https"
-                containerPort: 8443
-              { { end } }
-              - name: "http"
-                containerPort: 8080
-              { { else } }
-              - name: "http"
-                containerPort: 8001
-              { { end } }
-        { { - end } }
-        { { - if or $nautobot.nginx.enabled $nautobot.staticFilesOnly } }
+            {{- if not $nautobot.nginx.enabled }}
+             {{- if not $nautobot.uwsgi.disableHttps }}
+            - name: "https"
+              containerPort: 8443
+             {{ end }}
+            - name: "http"
+              containerPort: 8080
+            {{ else }}
+            - name: "http"
+              containerPort: 8001
+            {{ end }}
+        {{- end }}
+        {{- if or $nautobot.nginx.enabled $nautobot.staticFilesOnly }}
         - name: nginx
-          image: { { include "nautobot.nginx.image" $ } }
-          imagePullPolicy: { { $nautobot.nginx.image.pullPolicy } }
-          { { - if $nautobot.nginx.lifecycleHooks } }
-          lifecycle: { { - include "common.tplvalues.render" (dict "value" $nautobot.nginx.lifecycleHooks "context" $) | nindent 12 } }
-          { { - end } }
-          { { - if $nautobot.nginx.containerSecurityContext.enabled } }
-          securityContext: { { - omit $nautobot.nginx.containerSecurityContext "enabled" | toYaml | nindent 12 } }
-          { { - end } }
+          image: {{ include "nautobot.nginx.image" $ }}
+          imagePullPolicy: {{ $nautobot.nginx.image.pullPolicy }}
+          {{- if $nautobot.nginx.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" $nautobot.nginx.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $nautobot.nginx.containerSecurityContext.enabled }}
+          securityContext: {{- omit $nautobot.nginx.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           env:
-            { { - if $nautobot.nginx.extraEnvVars } }
-              { { - include "common.tplvalues.render" (dict "value" $nautobot.nginx.extraEnvVars "context" $) | nindent 12 } }
-              { { - end } }
+            {{- if $nautobot.nginx.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" $nautobot.nginx.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
           envFrom:
-            { { - if $nautobot.nginx.extraEnvVarsCM } }
-              { { - range $nautobot.nginx.extraEnvVarsCM } }
-              - configMapRef:
-                  name: { { include "common.tplvalues.render" (dict "value" . "context" $) } }
-              { { - end } }
-              { { - end } }
-              { { - if $nautobot.nginx.extraEnvVarsSecret } }
-              { { - range $nautobot.nginx.extraEnvVarsSecret } }
-              - secretRef:
-                  name: { { include "common.tplvalues.render" (dict "value" . "context" $) } }
-              { { - end } }
-              { { - end } }
-          { { - if $nautobot.nginx.resources } }
-          resources: { { - toYaml $nautobot.nginx.resources | nindent 12 } }
-          { { - end } }
-          { { - if $nautobot.nginx.livenessProbe.enabled } }
-          livenessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $nautobot.nginx.livenessProbe "enabled") "context" $) | nindent 12 } }
-          { { - end } }
-          { { - if $nautobot.nginx.readinessProbe.enabled } }
-          readinessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $nautobot.nginx.readinessProbe "enabled") "context" $) | nindent 12 } }
-          { { - end } }
+            {{- if $nautobot.nginx.extraEnvVarsCM }}
+            {{- range $nautobot.nginx.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+            {{- end }}
+            {{- end }}
+            {{- if $nautobot.nginx.extraEnvVarsSecret }}
+            {{- range $nautobot.nginx.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+            {{- end }}
+            {{- end }}
+          {{- if $nautobot.nginx.resources }}
+          resources: {{- toYaml $nautobot.nginx.resources | nindent 12 }}
+          {{- end }}
+          {{- if $nautobot.nginx.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $nautobot.nginx.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $nautobot.nginx.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $nautobot.nginx.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: "nginx-config"
               mountPath: "/etc/nginx/conf.d"
@@ -398,104 +399,104 @@ spec:
               containerPort: 8080
             - name: "metrics"
               containerPort: 8002
-        { { - end } }
-        { { - if and $.Values.metrics.enabled $nautobot.nginx.enabled $.Values.metrics.nginxExporter.enabled } }
+        {{- end }}
+        {{- if and $.Values.metrics.enabled $nautobot.nginx.enabled $.Values.metrics.nginxExporter.enabled }}
         - name: nginx-exporter
-          image: { { include "nautobot.nginxExporter.image" $ } }
-          imagePullPolicy: { { $.Values.metrics.nginxExporter.image.pullPolicy } }
-          { { - if $.Values.metrics.nginxExporter.containerSecurityContext.enabled } }
-          securityContext: { { - omit $.Values.metrics.nginxExporter.containerSecurityContext "enabled" | toYaml | nindent 12 } }
-          { { - end } }
+          image: {{ include "nautobot.nginxExporter.image" $ }}
+          imagePullPolicy: {{ $.Values.metrics.nginxExporter.image.pullPolicy }}
+          {{- if $.Values.metrics.nginxExporter.containerSecurityContext.enabled }}
+          securityContext: {{- omit $.Values.metrics.nginxExporter.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           args:
             - -nginx.scrape-uri=http://localhost:8002
-          { { - if $.Values.metrics.nginxExporter.resources } }
-          resources: { { - toYaml $.Values.metrics.nginxExporter.resources | nindent 12 } }
-          { { - end } }
-          { { - if $.Values.metrics.nginxExporter.livenessProbe.enabled } }
-          livenessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $.Values.metrics.nginxExporter.livenessProbe "enabled") "context" $) | nindent 12 } }
-          { { - end } }
-          { { - if $.Values.metrics.nginxExporter.readinessProbe.enabled } }
-          readinessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $.Values.metrics.nginxExporter.readinessProbe "enabled") "context" $) | nindent 12 } }
-          { { - end } }
+          {{- if $.Values.metrics.nginxExporter.resources }}
+          resources: {{- toYaml $.Values.metrics.nginxExporter.resources | nindent 12 }}
+          {{- end }}
+          {{- if $.Values.metrics.nginxExporter.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $.Values.metrics.nginxExporter.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $.Values.metrics.nginxExporter.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $.Values.metrics.nginxExporter.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
           ports:
             - name: "nginxmetrics"
               containerPort: 9113
-        { { - end } }
-        { { - if and $.Values.metrics.enabled $.Values.metrics.uwsgiExporter.enabled (not $nautobot.staticFilesOnly) } }
+        {{- end }}
+        {{- if and $.Values.metrics.enabled $.Values.metrics.uwsgiExporter.enabled (not $nautobot.staticFilesOnly) }}
         - name: uwsgi-exporter
-          image: { { include "nautobot.uwsgiExporter.image" $ } }
-          imagePullPolicy: { { $.Values.metrics.uwsgiExporter.image.pullPolicy } }
-          { { - if $.Values.metrics.uwsgiExporter.containerSecurityContext.enabled } }
-          securityContext: { { - omit $.Values.metrics.uwsgiExporter.containerSecurityContext "enabled" | toYaml | nindent 12 } }
-          { { - end } }
+          image: {{ include "nautobot.uwsgiExporter.image" $ }}
+          imagePullPolicy: {{ $.Values.metrics.uwsgiExporter.image.pullPolicy }}
+          {{- if $.Values.metrics.uwsgiExporter.containerSecurityContext.enabled }}
+          securityContext: {{- omit $.Values.metrics.uwsgiExporter.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           args:
             - "--stats.uri=http://localhost:1717"
-          { { - if $.Values.metrics.uwsgiExporter.resources } }
-          resources: { { - toYaml $.Values.metrics.uwsgiExporter.resources | nindent 12 } }
-          { { - end } }
-          { { - if $.Values.metrics.uwsgiExporter.livenessProbe.enabled } }
-          livenessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $.Values.metrics.uwsgiExporter.livenessProbe "enabled") "context" $) | nindent 12 } }
-          { { - end } }
-          { { - if $.Values.metrics.uwsgiExporter.readinessProbe.enabled } }
-          readinessProbe: { { - include "common.tplvalues.render" (dict "value" (omit $.Values.metrics.uwsgiExporter.readinessProbe "enabled") "context" $) | nindent 12 } }
-          { { - end } }
+          {{- if $.Values.metrics.uwsgiExporter.resources }}
+          resources: {{- toYaml $.Values.metrics.uwsgiExporter.resources | nindent 12 }}
+          {{- end }}
+          {{- if $.Values.metrics.uwsgiExporter.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $.Values.metrics.uwsgiExporter.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $.Values.metrics.uwsgiExporter.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $.Values.metrics.uwsgiExporter.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
           ports:
             - name: "uwsgimetrics"
               containerPort: 9117
-        { { - end } }
-        { { - if $nautobot.sidecars } }
-        { { - include "common.tplvalues.render" ( dict "value" $nautobot.sidecars "context" $) | nindent 8 } }
-        { { - end } }
-      terminationGracePeriodSeconds: { { $nautobot.terminationGracePeriodSeconds } }
+        {{- end }}
+        {{- if $nautobot.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" $nautobot.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      terminationGracePeriodSeconds: {{ $nautobot.terminationGracePeriodSeconds }}
       volumes:
         - name: "nautobot-static"
-        { { - if $nautobot.persistenceStaticFiles.enabled } }
-        persistentVolumeClaim:
-          claimName: { { include "common.names.fullname" $ } }-static
+        {{- if $nautobot.persistenceStaticFiles.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "common.names.fullname" $ }}-static
         {{- else }}
-        emptyDir: { }
-        { { - end } }
-        { { - if $nautobot.persistenceMediaFiles.enabled } }
+          emptyDir: { }
+        {{- end }}
+        {{- if $nautobot.persistenceMediaFiles.enabled }}
         - name: "nautobot-media"
           persistentVolumeClaim:
-            claimName: { { include "common.names.fullname" $ } }-media
+            claimName: {{ include "common.names.fullname" $ }}-media
         {{- end }}
         - name: "git-repos"
-        emptyDir: { }
+          emptyDir: { }
         - name: "nautobot-config"
           configMap:
-            name: { { include "common.names.fullname" $ } }-config
+            name: {{ include "common.names.fullname" $ }}-config
         {{- if and (not $.Values.nautobot.config) $.Values.nautobot.configCM }}
         - name: "nautobot-config-custom"
-        configMap:
-          name: { { $.Values.nautobot.configCM } }
-        { { - end } }
-        { { - if eq (include "nautobot.kubernetesJobsEnabled" $) "true" } }
+          configMap:
+            name: {{ $.Values.nautobot.configCM }}
+        {{- end }}
+        {{- if eq (include "nautobot.kubernetesJobsEnabled" $) "true" }}
         - name: "nautobot-k8s-jobs-manifests"
           configMap:
-            name: { { include "nautobot.kubernetesJobsConfigMapName" $ } }
-        { { - end } }
-        { { - if $nautobot.secret_name_tls } }
+            name: {{ include "nautobot.kubernetesJobsConfigMapName" $ }}
+        {{- end }}
+        {{- if $nautobot.secret_name_tls }}
         - name: "nautobot-certs"
           secret:
-            secretName: { { $nautobot.secret_name_tls } }
+            secretName: {{ $nautobot.secret_name_tls }}
             items:
               - key: "tls.crt"
                 path: "nautobot.crt"
               - key: "tls.key"
                 path: "nautobot.key"
-        { { - end } }
-        { { - if or $nautobot.nginx.enabled $nautobot.staticFilesOnly } }
+        {{- end }}
+        {{- if or $nautobot.nginx.enabled $nautobot.staticFilesOnly }}
         - name: "nginx-config"
           configMap:
-            name: { { include "common.names.fullname" $ } }-nginx-config
+            name: {{ include "common.names.fullname" $ }}-nginx-config
         {{- if not $nautobot.secret_name_tls }}
         - name: "nautobot-certs"
-        emptyDir: { }
-        { { - end } }
-        { { - end } }
-        { { - if $nautobot.extraVolumes } }
-        { { - include "common.tplvalues.render" ( dict "value" $nautobot.extraVolumes "context" $) | nindent 8 } }
-        { { - end } }
-  { { end - } }
-  { { end - } }
+          emptyDir: { }
+        {{- end }}
+        {{- end }}
+        {{- if $nautobot.extraVolumes }}
+        {{- include "common.tplvalues.render" ( dict "value" $nautobot.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+{{ end -}}
+{{ end -}}

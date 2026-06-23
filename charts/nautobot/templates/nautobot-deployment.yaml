@@ -234,7 +234,7 @@ spec:
                       {{- if $nautobot.extraEnvVars }}
                       {{- include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 }}
                       {{- end }}
-            {{- if not .Values.useImageEnv }}
+            {{- if not $.Values.useImageEnv }}
             - name: NAUTOBOT_DB_USER
                         {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
             - name: NAUTOBOT_DB_PASSWORD

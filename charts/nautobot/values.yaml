@@ -2,6 +2,9 @@
 # -- (map[string]string) Annotations to be applied to ALL resources created by this chart
 commonAnnotations: {}
 # Nautobot UI front end service
+
+useImageEnv: true
+
 service:
   # -- (`ExternalName`, `ClusterIP`, `NodePort`, or `LoadBalancer`) [[ref](https://kubernetes.io/docs/concepts/services-networking/service/)] Kubernetes service type, valid values: `ExternalName`, `ClusterIP`, `NodePort`, or `LoadBalancer`
   type: "ClusterIP"
@@ -33,7 +36,6 @@ service:
 # Nautobot Server
 nautobot:
   # -- Enable the default Nautobot deployment
-  useImageEnv: true
   # Nautobot image
   image:
     registry: "docker.io"

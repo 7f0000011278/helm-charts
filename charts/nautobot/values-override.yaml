@@ -12,8 +12,6 @@ postgresql:
 
 nautobot:
 
-  useImageEnv: true
-
   image:
     registry: "docker.io"
     repository: "7f0000011278/nautobot"

@@ -46,3 +46,15 @@ NAUTOBOT_KUBERNETES_JOB_POD_NAMESPACE: {{ .Release.Namespace | quote }}
 {{- end }}
 {{- end }}
 {{ end }}
+
+{{- define "nautobot.configMap.config" -}}
+{{- if .Values.nautobot.config }}
+nautobot_config.py: |
+{{- .Values.nautobot.config | nindent 2 }}
+{{- end }}
+uwsgi.ini: |
+{{- if .Values.nautobot.uWSGIini }}
+{{- .Values.nautobot.uWSGIini | nindent 2 }}
+{{- else }}
+{{- include "nautobot.uwsgi.ini" . | nindent 2 }}
+{{

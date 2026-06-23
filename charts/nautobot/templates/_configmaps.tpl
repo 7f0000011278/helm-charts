@@ -57,4 +57,5 @@ uwsgi.ini: |
 {{- .Values.nautobot.uWSGIini | nindent 2 }}
 {{- else }}
 {{- include "nautobot.uwsgi.ini" . | nindent 2 }}
-{{
+{{- end }}
+{{- end }}

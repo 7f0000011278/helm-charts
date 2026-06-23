@@ -1,0 +1,126 @@
+fullnameOverride: "nautobot-3-1"
+
+service:
+  type: ClusterIP
+  port: 8443
+
+redis:
+  enabled: false
+
+postgresql:
+  enabled: false
+
+nautobot:
+
+  useImageEnv: true
+
+  image:
+    registry: "docker.io"
+    repository: "7f0000011278/nautobot"
+    tag: "final-dev-test"
+    pullPolicy: "IfNotPresent"
+
+  extraVars:
+    - name: NAUTOBOT_LOG_LEVEL
+      value: "INFO"
+    - name: NAUTOBOT_ALLOWED_HOSTS
+      value: "*"
+
+  #  redis:
+  #    host: "lxrdsnautdevs01.lowes.com"
+  #    port: 6378
+  #    ssl: true
+  #    existingSecret: nautobot-redis
+  #    existingSecretPasswordKey: redis-password
+  #
+  #  db:
+  #    host: "lxpgsnautdevs01.lowes.com"
+  #    port: 50001
+  #    existingSecret: nautobot-db
+  #    existingSecretPasswordKey: db-password
+
+  containerSecurityContext:
+    enabled: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    runAsUser: 999
+    runAsGroup: 999
+    capabilities:
+      drop:
+        - "ALL"
+
+  ingress:
+    enabled: false
+
+  config: |
+    import os
+    import sys
+    import ssl
+    from nautobot.core.settings import *  # noqa: F401, F403
+    from nautobot.core.settings_funcs import is_truthy
+
+    PLUGINS = ["nautobot_plugin_nornir", "nautobot_golden_config", "nautobot_ssot", "nautobot_device_onboarding"]
+    PLUGINS_CONFIG = {
+      "nautobot_plugin_nornir": {
+        "nornir_settings": {
+          "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
+          "runner": {
+            "plugin": "threaded",
+            "options": {"num_workers": 20},
+          },
+        },
+      },
+      "nautobot_golden_config": {
+        "per_feature_bar_width": 0.15,
+        "per_feature_width": 13,
+        "per_feature_height": 4,
+        "enable_backup": True,
+        "enable_compliance": True,
+        "enable_intended": True,
+        "enable_sotagg": True,
+        "enable_plan": True,
+        "enable_deploy": True,
+        "enable_postprocessing": False,
+        "sot_agg_transposer": None,
+        "postprocessing_callables": [],
+        "postprocessing_subscribed": [],
+        "jinja_env": {
+          "undefined": "jinja2.StrictUndefined",
+          "trim_blocks": True,
+          "lstrip_blocks": False,
+        },
+      },
+    }
+
+    ALLOWED_HOSTS = os.getenv("NAUTOBOT_ALLOWED_HOSTS", "*").split()
+    DEBUG = is_truthy(os.getenv("NAUTOBOT_DEBUG", "False"))
+    LOG_LEVEL = "DEBUG" if DEBUG else os.getenv("NAUTOBOT_LOG_LEVEL", "INFO")
+    METRICS_ENABLED = is_truthy(os.getenv("NAUTOBOT_METRICS_ENABLED", "False"))
+
+    DATABASES = {
+      "default": {
+        "ENGINE": os.getenv("NAUTOBOT_DB_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.getenv("NAUTOBOT_DB_NAME", "nautobot"),
+        "USER": os.getenv("NAUTOBOT_DB_USER", ""),
+        "PASSWORD": os.getenv("NAUTOBOT_DB_PASSWORD", ""),
+        "HOST": os.getenv("NAUTOBOT_DB_HOST", ""),
+        "PORT": os.getenv("NAUTOBOT_DB_PORT", ""),
+        "CONN_MAX_AGE": int(os.getenv("NAUTOBOT_DB_TIMEOUT", "300")),
+      }
+    }
+
+    SECRET_KEY = os.getenv("NAUTOBOT_SECRET_KEY", "")
+
+
+
+workers:
+celery:
+celeryBeat:
+celeryWorker:
+commonAnnotations:
+ingress:
+initJob:
+route:
+metrics:
+nautobots:
+serviceAccount:

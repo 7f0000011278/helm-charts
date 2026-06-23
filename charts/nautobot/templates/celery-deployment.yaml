@@ -116,11 +116,13 @@ spec:
               {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
             - name: NAUTOBOT_DB_PASSWORD
               {{- include "nautobot.database.passEnvVarDef" $ | nindent 14 }}
+            { { - if not .Values.useImageEnv } }
             - name: NAUTOBOT_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "nautobot.redis.passwordName" $ }}
-                  key: {{ include "nautobot.redis.passwordKey" $ }}
+                  name: { { include "nautobot.redis.passwordName" $ } }
+                  key: { { include "nautobot.redis.passwordKey" $ } }
+            { { - end } }
           envFrom:
             - configMapRef:
                 name: {{ include "common.names.fullname" $ }}-env

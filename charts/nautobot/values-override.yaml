@@ -110,17 +110,3 @@ nautobot:
     }
 
     SECRET_KEY = os.getenv("NAUTOBOT_SECRET_KEY", "")
-
-
-
-workers:
-celery:
-celeryBeat:
-celeryWorker:
-commonAnnotations:
-ingress:
-initJob:
-route:
-metrics:
-nautobots:
-serviceAccount:

@@ -38,7 +38,7 @@ nautobot:
   image:
     registry: "docker.io"
     repository: "7f0000011278/nautobot"
-    tag: "v2"
+    tag: "v3"
     pullPolicy: Always
     pullSecrets: []
     # e.g.
@@ -425,7 +425,6 @@ nautobot:
     # -- API Token key to be retrieved from existing secret<sup>[1](#notes)</sup>
     existingSecretApiTokenKey: ""
     # -- [[ref](https://nautobot.readthedocs.io/en/stable/docker/#nautobot_create_superuser)] Create a new super user account in Nautobot once deployed (NAUTOBOT_CREATE_SUPERUSER)<sup>[1](#notes)</sup>
-    enabled: true
     # -- [[ref](https://nautobot.readthedocs.io/en/stable/docker/#nautobot_superuser_api_token)] Configure an API key for the super user if `nautobot.superUser.enabled` is `true` (NAUTOBOT_SUPERUSER_API_TOKEN)<sup>[1](#notes)</sup>
     apitoken: ""
     # -- [[ref](https://nautobot.readthedocs.io/en/stable/docker/#nautobot_superuser_email)] Configure an email address for the super user if `nautobot.superUser.enabled` is `true` (NAUTOBOT_SUPERUSER_EMAIL)<sup>[1](#notes)</sup>

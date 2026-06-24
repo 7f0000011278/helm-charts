@@ -71,15 +71,6 @@ spec:
             {{- if $initJob.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" $initJob.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
-            - name: NAUTOBOT_DB_USER
-              {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
-            - name: NAUTOBOT_DB_PASSWORD
-              {{- include "nautobot.database.passEnvVarDef" $ | nindent 14 }}
-            - name: NAUTOBOT_REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "nautobot.redis.passwordName" $ }}
-                  key: {{ include "nautobot.redis.passwordKey" $ }}
             - name: NAUTOBOT_SECRET_KEY
               valueFrom:
                 secretKeyRef:

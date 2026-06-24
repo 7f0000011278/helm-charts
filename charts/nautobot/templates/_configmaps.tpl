@@ -5,13 +5,7 @@ NAUTOBOT_CREATE_SUPERUSER: "true"
 {{- else }}
 NAUTOBOT_CREATE_SUPERUSER: "false"
 {{- end }}
-{{- if not .Values.useImageEnv }}
-NAUTOBOT_DB_ENGINE: {{ include "nautobot.database.engine" . | quote }}
-NAUTOBOT_DB_HOST: {{ include "nautobot.database.host" . | quote }}
-NAUTOBOT_DB_NAME: {{ include "nautobot.database.dbname" . | quote }}
-NAUTOBOT_DB_PORT: {{ include "nautobot.database.port" . | quote }}
-NAUTOBOT_DB_TIMEOUT: {{ .Values.nautobot.db.timeout | quote }}
-{{- end }}
+
 {{- if .Values.nautobot.debug }}
 NAUTOBOT_DEBUG: "True"
 {{- else }}
@@ -22,12 +16,6 @@ NAUTOBOT_LOG_LEVEL: {{ .Values.nautobot.logLevel | quote }}
 NAUTOBOT_METRICS_ENABLED: "True"
 {{- else }}
 NAUTOBOT_METRICS_ENABLED: "False"
-{{- end }}
-{{- if not .Values.useImageEnv }}
-NAUTOBOT_REDIS_HOST: {{ include "nautobot.redis.host" . | quote }}
-NAUTOBOT_REDIS_PORT: {{ include "nautobot.redis.port" . | quote }}
-NAUTOBOT_REDIS_USERNAME: {{ .Values.nautobot.redis.username | quote }}
-NAUTOBOT_REDIS_SSL: {{ include "nautobot.redis.ssl" . | quote }}
 {{- end }}
 {{- if .Values.nautobot.superUser.enabled }}
 NAUTOBOT_SUPERUSER_EMAIL: {{ .Values.nautobot.superUser.email | quote }}

@@ -112,17 +112,6 @@ spec:
             {{- if $celery.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" $celery.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
-            {{- if not $.Values.useImageEnv }}
-            - name: NAUTOBOT_DB_USER
-              {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
-            - name: NAUTOBOT_DB_PASSWORD
-              {{- include "nautobot.database.passEnvVarDef" $ | nindent 14 }}
-            - name: NAUTOBOT_REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "nautobot.redis.passwordName" $ }}
-                  key: {{ include "nautobot.redis.passwordKey" $ }}
-            {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ include "common.names.fullname" $ }}-env

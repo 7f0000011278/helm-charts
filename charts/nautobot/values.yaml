@@ -806,24 +806,29 @@ kubernetesJobs:
 # -- (map[name]celery) Additional Celery Worker deployments, map key is the name of the deployment and the additional key `enabled` is required for each Worker deployment, all other keys for each Worker will override the defaults provided by the root `.Values.celery`.
 # @default -- See values.yaml
 workers:
-  # -- (celery) Values for the Default Celery Worker deployment see values.yaml `.celery` for assumed defaults
-  # @default -- See values.yaml
-  workers:
-    default:
-      enabled: true
-      taskQueues: "default"
-      livenessProbe:
-        exec:
-          command:
-            - "bash"
-            - "-c"
-            - "nautobot-server celery status"
-        initialDelaySeconds: 60
-        periodSeconds: 30
-        timeoutSeconds: 30
-        failureThreshold: 5
-      readinessProbe:
-        enabled: false
+  default:
+    enabled: true
+    taskQueues: "default"
+    livenessProbe:
+      exec:
+        command:
+          - "bash"
+          - "-c"
+          - "nautobot-server celery status"
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      timeoutSeconds: 30
+      failureThreshold: 5
+    readinessProbe:
+      exec:
+        command:
+          - "bash"
+          - "-c"
+          - "nautobot-server celery status"
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      timeoutSeconds: 15
+      failureThreshold: 5
   beat:
     enabled: true
     concurrency: 0

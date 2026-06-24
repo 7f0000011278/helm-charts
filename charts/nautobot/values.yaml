@@ -579,11 +579,11 @@ celery:
       command:
         - "bash"
         - "-c"
-        - "[ $(find /tmp/nautobot_celery_worker_ready | wc -l) -eq 1 ] || false"
-    initialDelaySeconds: 10
-    periodSeconds: 60
-    timeoutSeconds: 10
-    failureThreshold: 3
+        - "nautobot-server celery status"
+    initialDelaySeconds: 30
+    periodSeconds: 15
+    timeoutSeconds: 15
+    failureThreshold: 5
     successThreshold: 1
 
   # -- (ResourceRequirements) [[ref](http://kubernetes.io/docs/user-guide/compute-resources/)] Nautobot Celery Worker resource requests and limits

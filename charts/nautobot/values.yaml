@@ -3,8 +3,6 @@
 commonAnnotations: {}
 # Nautobot UI front end service
 
-useImageEnv: true
-
 service:
   # -- (`ExternalName`, `ClusterIP`, `NodePort`, or `LoadBalancer`) [[ref](https://kubernetes.io/docs/concepts/services-networking/service/)] Kubernetes service type, valid values: `ExternalName`, `ClusterIP`, `NodePort`, or `LoadBalancer`
   type: "ClusterIP"

@@ -62,7 +62,7 @@ nautobot:
   replicaCount: 2
   # -- [[ref](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#clean-up-policy)] Number of old ReplicaSets to retain
   revisionHistoryLimit: 3
-
+  logLevel: "INFO"
   # -- (Probe) [[ref](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes)] Nautobot liveness probe
   # @default -- See values.yaml
   livenessProbe:

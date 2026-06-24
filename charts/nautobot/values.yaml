@@ -403,37 +403,7 @@ nautobot:
   allowedHosts: "*"
 
   # Nautobot database configuration
-  db:
-    engine: "django.db.backends.postgresql"
-    existingSecret: ""
-    existingSecretUsernameKey: "username"
-    existingSecretPasswordKey: "password"
-    host: "host.docker.internal"
-    name: "nautobot"
-    password: ""
-    port: 5432
-    timeout: 300
-    user: "nautobot"
 
-  # -- (`CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`) Log Level used for Celery logging, valid values: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`<sup>[1](#notes)</sup>
-  logLevel: "INFO"
-  # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/optional-settings/#metrics_enabled)] Enable Prometheus metrics endpoint (NAUTOBOT_METRICS_ENABLED)<sup>[1](#notes)</sup>
-  metrics: true
-
-  # Nautobot Redis configuration
-  redis:
-    existingSecret: "redis-secret"
-    existingSecretPasswordKey: "redis-password"
-    # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/required-settings/#rq_queues)] Nautobot external Redis hostname, ignored if `redis.enabled` is `true` (NAUTOBOT_REDIS_HOST)<sup>[1](#notes)</sup>
-    host: ""
-    # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/required-settings/#rq_queues)] Nautobot external Redis password, ignored if `redis.enabled` is `true` (NAUTOBOT_REDIS_PASSWORD)<sup>[1](#notes)</sup>
-    password: ""
-    # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/required-settings/#rq_queues)] Nautobot external Redis port, ignored if `redis.enabled` is `true` (NAUTOBOT_REDIS_PORT)<sup>[1](#notes)</sup>
-    port: 6379
-    # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/required-settings/#rq_queues)] Nautobot external Redis ssl enabled, ignored if `redis.enabled` is `true` (NAUTOBOT_REDIS_SSL)<sup>[1](#notes)</sup>
-    ssl: false
-    # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/required-settings/#rq_queues)] Nautobot external Redis username, ignored if `redis.enabled` is `true` (NAUTOBOT_REDIS_USERNAME)<sup>[1](#notes)</sup>
-    username: ""
 
   # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/required-settings/#secret_key)] Nautobot Secret Key (NAUTOBOT_SECRET_KEY)<sup>[1](#notes)</sup>
   secretKey: ""

@@ -10,21 +10,15 @@ The celeryBeat helm value has been deprecated and moved to workers.beat see
 https://docs.nautobot.com/projects/helm-charts/en/stable/configuration/reference/#workers-values for more information.
 {{ end }}
 {{ end }}
-{{- if and (not .Values.postgresql.enabled) (not .Values.nautobot.db.existingSecret) (eq .Values.nautobot.db.password "") }}
+{{- if .Values.nautobot.useImageEnv }}
 *********************************************************************
-*** WARNING: No database password configured!  **********************
+*** Image-managed environment mode (useImageEnv) is ENABLED        ***
 *********************************************************************
 
-The external database has been configured without a password. This means:
-- Basic authentication will NOT work
-- The database must be configured with custom authentication (e.g., token-based auth)
-- Ensure your database supports the authentication method you're using
+Database and Redis connection details are provided by the container image,
+not by this chart. Ensure the image (or the environment that injects into it)
+supplies NAUTOBOT_DB_* and NAUTOBOT_REDIS_* for all Nautobot pods.
 
-{{ end }}
-{{- if and (or .Values.postgresql.enabled .Values.nautobot.db.host ) (or .Values.redis.enabled .Values.nautobot.redis.host) -}}
-{{- if and .Values.nautobot.nginx.enabled }}
-We will update the uwsgi configuration in future releases, which will break default readiness and startup probes when you have nginx enabled.
-You will have to update your configuration or disable probes.
 {{ end }}
 *********************************************************************
 *** PLEASE BE PATIENT: Nautobot may take a few minutes to install ***
@@ -78,29 +72,5 @@ Make sure you take note of your Nautobot `NAUTOBOT_SECRET_KEY` by running:
 
   echo Secret Key: $(kubectl get secret --namespace {{ .Release.Namespace }} {{ include "common.names.fullname" . }}-env -o jsonpath="{.data.NAUTOBOT_SECRET_KEY}" | base64 --decode)
 {{- end }}
-{{- if .Values.postgresql.enabled }}
-
-To take a backup of the database run:
-
-  export POSTGRES_PASSWORD=$(kubectl get secret --namespace {{ .Release.Namespace }} {{ include "common.names.fullname" . }}-postgresql -o jsonpath="{.data.postgres-password}" | base64 --decode)
-  echo $POSTGRES_PASSWORD | kubectl exec -itn {{ .Release.Namespace }} statefulset.apps/{{ include "common.names.fullname" . }}-postgresql -- pg_dump --username {{ .Values.postgresql.auth.username }} --clean --if-exists nautobot > backup.sql
-
-{{- end }}
-{{- else -}}
-
-########################################################################################
-### ERROR: You did not provide an external database host in your 'helm install' call ###
-########################################################################################
-
-This deployment will be incomplete until you configure Nautobot with a resolvable database
-host. To configure Nautobot to use and external database host:
-
-## PLEASE UPDATE THE EXTERNAL DATABASE CONNECTION PARAMETERS IN THE FOLLOWING COMMAND AS NEEDED ##
-
-  helm upgrade {{ .Release.Name }} bitnami/{{ .Chart.Name }} \
-    --set service.type={{ .Values.service.type }},postgres.enabled=false{{- if not (empty .Values.nautobot.db.user) }},nautobot.db.user={{ .Values.nautobot.db.user }}{{- end }}{{- if not (empty .Values.nautobot.db.password) }},nautobot.db.password={{ .Values.nautobot.db.password }}{{- end }}{{- if not (empty .Values.nautobot.db.name) }},nautobot.db.name={{ .Values.nautobot.db.name }}{{- end }},nautobot.db.host=YOUR_EXTERNAL_DATABASE_HOST{{- if .Values.global }}{{- if .Values.global.imagePullSecrets }},global.imagePullSecrets={{ .Values.global.imagePullSecrets }}{{- end }}{{- end }}
-
-{{- end }}
-
 
 {{- include "common.warnings.rollingTag" .Values.nautobot.image }}

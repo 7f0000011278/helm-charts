@@ -15,6 +15,7 @@ metadata:
     {{- end }}
   {{- if (or $nautobot.annotations $.Values.commonAnnotations) }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" (merge $nautobot.annotations $.Values.commonAnnotations) "context" $ ) | nindent 4 }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" (merge $nautobot.annotations $.Values.commonAnnotations) "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   {{- if not $nautobot.autoscaling.enabled }}
@@ -81,6 +82,15 @@ spec:
             {{- if $nautobot.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
+            - name: NAUTOBOT_DB_USER
+              {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_DB_PASSWORD
+              {{- include "nautobot.database.passEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.redis.passwordName" $ }}
+                  key: {{ include "nautobot.redis.passwordKey" $ }}
             - name: NAUTOBOT_SECRET_KEY
               valueFrom:
                 secretKeyRef:
@@ -161,6 +171,15 @@ spec:
             {{- if $nautobot.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
+            - name: NAUTOBOT_DB_USER
+              {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_DB_PASSWORD
+              {{- include "nautobot.database.passEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.redis.passwordName" $ }}
+                  key: {{ include "nautobot.redis.passwordKey" $ }}
           envFrom:
             - configMapRef:
                 name: {{ include "common.names.fullname" $ }}-env
@@ -212,8 +231,36 @@ spec:
           env:
             - name: "NAUTOBOT_K8S_COMPONENT"
               value: "nautobot-{{ $nautobotName }}"
-            {{- if $nautobot.extraEnvVars }}
-            {{- include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 }}
+                      {{- if $nautobot.extraEnvVars }}
+                      {{- include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 }}
+                      {{- end }}
+            {{- if not $.Values.useImageEnv }}
+            - name: NAUTOBOT_DB_USER
+                        {{- include "nautobot.database.userEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_DB_PASSWORD
+                        {{- include "nautobot.database.passEnvVarDef" $ | nindent 14 }}
+            - name: NAUTOBOT_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.redis.passwordName" $ }}
+                  key: {{ include "nautobot.redis.passwordKey" $ }}
+                      {{- end }}
+            - name: NAUTOBOT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.django.secretName" $ }}
+                  key: {{ include "nautobot.django.existingSecretSecretKeyKey" $ }}
+                      {{ if $nautobot.superUser.existingSecret -}}
+            - name: NAUTOBOT_SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.superUser.secretName" $ }}
+                  key: {{ include "nautobot.superUser.existingSecretPasswordKey" $ }}
+            - name: NAUTOBOT_SUPERUSER_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nautobot.superUser.secretName" $ }}
+                  key: {{ include "nautobot.superUser.existingSecretApiTokenKey" $ }}
             {{- end }}
           envFrom:
             - configMapRef:

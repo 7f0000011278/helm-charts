@@ -78,25 +78,10 @@ spec:
             - "echo"
             - "Nautobot Initialization Done"
           env:
+            - name: "NAUTOBOT_K8S_COMPONENT"
+              value: "nautobot-init"
             {{- if $nautobot.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" $nautobot.extraEnvVars "context" $) | nindent 12 }}
-            {{- end }}
-            - name: NAUTOBOT_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "nautobot.django.secretName" $ }}
-                  key: {{ include "nautobot.django.existingSecretSecretKeyKey" $ }}
-            {{ if $nautobot.superUser.existingSecret -}}
-            - name: NAUTOBOT_SUPERUSER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "nautobot.superUser.secretName" $ }}
-                  key: {{ include "nautobot.superUser.existingSecretPasswordKey" $ }}
-            - name: NAUTOBOT_SUPERUSER_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "nautobot.superUser.secretName" $ }}
-                  key: {{ include "nautobot.superUser.existingSecretApiTokenKey" $ }}
             {{- end }}
           envFrom:
             - configMapRef:

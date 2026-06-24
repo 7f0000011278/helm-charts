@@ -38,7 +38,7 @@ nautobot:
   image:
     registry: "docker.io"
     repository: "7f0000011278/nautobot"
-    tag: "v3"
+    tag: "v4"
     pullPolicy: Always
     pullSecrets: []
     # e.g.

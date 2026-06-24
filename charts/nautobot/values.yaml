@@ -808,12 +808,22 @@ kubernetesJobs:
 workers:
   # -- (celery) Values for the Default Celery Worker deployment see values.yaml `.celery` for assumed defaults
   # @default -- See values.yaml
-  default:
-    enabled: true
-    # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/administration/celery-queues/)] a comma separated list of Celery Queues to listen on.
-    taskQueues: "default"
-  # -- (celery) Values for the Celery Beat deployment see values.yaml `.celery` for assumed defaults
-  # @default -- See values.yaml
+  workers:
+    default:
+      enabled: true
+      taskQueues: "default"
+      livenessProbe:
+        exec:
+          command:
+            - "bash"
+            - "-c"
+            - "nautobot-server celery status"
+        initialDelaySeconds: 60
+        periodSeconds: 30
+        timeoutSeconds: 30
+        failureThreshold: 5
+      readinessProbe:
+        enabled: false
   beat:
     enabled: true
     concurrency: 0

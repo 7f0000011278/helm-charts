@@ -561,11 +561,11 @@ celery:
       command:
         - "bash"
         - "-c"
-        - "[ $(find /tmp/nautobot_celery_worker_heartbeat -mmin -1 | wc -l) -eq 1 ] || false"
-    initialDelaySeconds: 10
-    periodSeconds: 60
-    timeoutSeconds: 10
-    failureThreshold: 3
+        - "nautobot-server celery status"
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 30
+    failureThreshold: 5
     successThreshold: 1
 
   # -- [[ref](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/)] Termination Grace Period Seconds

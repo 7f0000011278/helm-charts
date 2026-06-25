@@ -300,7 +300,7 @@ nautobot:
   # Nautobot NGINX configuration
   nginx:
     # -- Enable an nginx sidecar to proxy Nautobot traffic (can be useful for large deployments)
-    enabled: false
+    enabled: true
     # NGINX image
     image:
       # -- NGINX image registry

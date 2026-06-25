@@ -234,7 +234,7 @@ nautobot:
   ##    command: ['sh', '-c', 'echo "hello world"']
 
   # -- (TLSSecretName) [[ref](https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets)] Name of existing secret containing TLS certs for HTTPS configuration
-  secret_name_tls: "nautobot-tls""
+  secret_name_tls: "nautobot-tls"
 
   # -- [[ref](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)] Define a horizontal pod autoscaler
   # @default -- See values.yaml

@@ -238,6 +238,9 @@ nautobot:
       volumeMounts:
         - name: tmp
           mountPath: /tmp
+      extraVolumes:
+        - name: tmp
+          emptyDir: { }
   ## e.g:
   ## initContainers:
   ##  - name: your-image-name

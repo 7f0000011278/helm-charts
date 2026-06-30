@@ -234,7 +234,7 @@ nautobot:
   ##    command: ['sh', '-c', 'echo "hello world"']
 
   # -- (TLSSecretName) [[ref](https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets)] Name of existing secret containing TLS certs for HTTPS configuration
-  secret_name_tls: "nautobot-tls"
+  secret_name_tls: ""
 
   # -- [[ref](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)] Define a horizontal pod autoscaler
   # @default -- See values.yaml
@@ -908,7 +908,6 @@ ingress:
   tls: false
 
   # -- The name of the secret to use for the TLS certificate
-  secretName: "nautobot-tls"
 
   # -- The list of additional hostnames to be covered with this ingress record.
   # Most likely the hostname above will be enough, but in the event more hosts are needed, this is an array
@@ -961,7 +960,7 @@ route:
     # -- Enable TLS configuration for the hostname defined at `route.hostname` parameter
     tls: false
     # -- The name of the secret to use for the TLS certificate
-    secretName: "nautobot-tls"
+    secretName: ""
     # -- Infrastructure related labels defined as key:value pairs, see the documentation for your specific Gateway provider for more details
     infrastructureLabels: {}
     # -- Infrastructure related annotations defines as key:value pairs, see the documentation for your specific Gateway provider for more details

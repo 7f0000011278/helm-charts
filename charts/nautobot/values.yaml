@@ -225,22 +225,7 @@ nautobot:
   #         containerPort: 1234
 
   # -- ([]Container) [[ref](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/)] Add additional init containers to the Nautobot server pods
-  initContainers:
-    - name: nautobot-migrate
-      image: "docker.io/7f0000011278/nautobot"
-      command: [ "nautobot-server", "migrate" ]
-      securityContext:
-        readOnlyRootFilesystem: true
-        allowPrivilegeEscalation: false
-        runAsUser: 999
-        capabilities:
-          drop: [ "ALL" ]
-      volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-  extraVolumes:
-    - name: tmp
-      emptyDir: {}
+  initContainers: []
 
   ## e.g:
   ## initContainers:

@@ -238,6 +238,9 @@ nautobot:
       volumeMounts:
         - name: tmp
           mountPath: /tmp
+  extraVolumes:
+    - name: tmp
+      emptyDir: {}
 
   ## e.g:
   ## initContainers:
@@ -705,7 +708,6 @@ celery:
   # -- ([]string) List of names of existing Secrets containing extra env vars for Nautobot Celery Worker pods
   extraEnvVarsSecret: []
   # -- ([]Volume) List of additional volumes for the Nautobot Celery Worker pod
-  extraVolumes: []
   # -- ([]VolumeMount) List of additional volumeMounts for the Nautobot Celery Worker containers
   extraVolumeMounts: []
   # -- ([]Container) Add additional sidecar containers to the Nautobot Celery Worker pods

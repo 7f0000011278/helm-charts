@@ -302,7 +302,7 @@ nautobot:
   # Nautobot NGINX configuration
   nginx:
     # -- Enable an nginx sidecar to proxy Nautobot traffic (can be useful for large deployments)
-    enabled: false
+    enabled: true
     # NGINX image
     image:
       # -- NGINX image registry
@@ -465,6 +465,7 @@ nautobot:
 
   # -- The path where the Nautobot Kubernetes Job manifests will be mounted in the Nautobot Pod.
   jobsManifestsMountPath: "/etc/nautobot/job-queues"
+
 
 # -- Override values for the nautobot-init job if nautobot.singleInit is true
 # @default -- See values.yaml

@@ -210,10 +210,40 @@ nautobot:
   # -- ([]string) List of names of existing Secrets containing extra env vars for Nautobot server pods
   extraEnvVarsSecret: []
   # -- ([]Volume) List of additional volumes for the Nautobot server pod
-  extraVolumes: []
-  # -- ([]VolumeMount) List of additional volumeMounts for the Nautobot containers
-  extraVolumeMounts: []
-  # -- ([]Container) Add additional sidecar containers to the Nautobot server pods
+  extraVolumes:
+    - name: tls
+      secret:
+        secretName: nautobot-tls
+        items:
+          - key: tls.crt
+            path: nautobot.crt
+          - key: tls.key
+            path: nautobot.key
+    - name: tmp
+      emptyDir: { }
+    - name: jobs
+      emptyDir: { }
+    - name: media
+      emptyDir: { }
+    - name: prom-cache
+      emptyDir: { }
+  extraVolumeMounts:
+    - name: tls
+      mountPath: /opt/nautobot/nautobot.crt
+      subPath: nautobot.crt
+      readOnly: true
+    - name: tls
+      mountPath: /opt/nautobot/nautobot.key
+      subPath: nautobot.key
+      readOnly: true
+    - name: tmp
+      mountPath: /tmp
+    - name: jobs
+      mountPath: /opt/nautobot/jobs
+    - name: media
+      mountPath: /opt/nautobot/media
+    - name: prom-cache
+      mountPath: /prom_cache
   sidecars: []
   # e.g.
   # sidecars:

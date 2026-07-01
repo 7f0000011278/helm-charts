@@ -91,13 +91,15 @@ nautobot:
       command: [ "bash", "-c", "nautobot-server health_check" ]
     initialDelaySeconds: 3
     periodSeconds: 10
-    timeoutSeconds: 10
+    timeoutSeconds: 20
     failureThreshold: 3
+
   startupProbe:
     enabled: true
     exec:
       command: [ "bash", "-c", "nautobot-server health_check" ]
     periodSeconds: 10
+    timeoutSeconds: 20
     failureThreshold: 30
 
   # -- (ResourceRequirements) (ResourceRequirements) [[ref](http://kubernetes.io/docs/user-guide/compute-resources/)] Nautobot resource requests and limits

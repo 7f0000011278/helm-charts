@@ -360,7 +360,42 @@ nautobot:
           - "NET_BIND_SERVICE"
 
     # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/http-server/#configure-nginx)] Replace the entire Nginx configuration with this value<sup>[1](#notes)</sup>
-    config: ""
+    config: |
+      PLUGINS = ["nautobot_plugin_nornir", "nautobot_ssot", "nautobot_device_onboarding", "nautobot_golden_config"]
+
+      PLUGINS_CONFIG = {
+          "nautobot_plugin_nornir": {
+              "nornir_settings": {
+                  "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
+                  "runner": {
+                      "plugin": "threaded",
+                      "options": {
+                          "num_workers": 20,
+                      },
+                  },
+              },
+          },
+          "nautobot_golden_config": {
+              "per_feature_bar_width": 0.15,
+              "per_feature_width": 13,
+              "per_feature_height": 4,
+              "enable_backup": True,
+              "enable_compliance": True,
+              "enable_intended": True,
+              "enable_sotagg": True,
+              "enable_plan": True,
+              "enable_deploy": True,
+              "enable_postprocessing": False,
+              "sot_agg_transposer": None,
+              "postprocessing_callables": [],
+              "postprocessing_subscribed": [],
+              "jinja_env": {
+                  "undefined": "jinja2.StrictUndefined",
+                  "trim_blocks": True,
+                  "lstrip_blocks": False,
+              },
+          },
+      }
 
     # -- If custom certificated are used, define the directory of certificates (without trailing slash) from the Nautobot container (they should be named `nautobot.`)
     certificates_path: "/opt/nautobot"

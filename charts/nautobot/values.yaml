@@ -451,7 +451,7 @@ nautobot:
                   "lstrip_blocks": False,
               },
           },
-      }"
+      }
 
   # -- [[ref](https://docs.nautobot.com/projects/core/en/stable/configuration/)] Use custom configuration defined in an existing ConfigMap<sup>[1](#notes)</sup>
   configCM: ""
